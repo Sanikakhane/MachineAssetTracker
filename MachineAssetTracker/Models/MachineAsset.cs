@@ -12,6 +12,5 @@ namespace MachineAssetTracker.Models
         public string Asset { get; set; } = string.Empty;
         public string Series { get; set; } = string.Empty;
 
-
     }
 }
