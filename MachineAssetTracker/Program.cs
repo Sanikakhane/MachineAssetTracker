@@ -1,10 +1,10 @@
 using MachineAssetTracker.Components;
-using MachineAssetTracker.Data;
 using MachineAssetTracker.Interfaces;
 using Microsoft.OpenApi.Models;
 using MongoDB.Driver;
 using MachineAssetTracker.Services;
 using Serilog;
+using MachineAssetTracker.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 

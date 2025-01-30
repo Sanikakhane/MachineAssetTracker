@@ -1,15 +1,19 @@
-﻿using MachineAssetTracker.Models;
-using MachineAssetTracker.Data;
+﻿using MachineAssetTracker.Data;
+using MachineAssetTracker.Models;
+
 
 public class DataLoader : IHostedService
 {
-    private readonly MongoDBContext _mongoDbContext = new MongoDBContext(); // Ensure MongoDBContext is injected
-    private readonly ILogger<DataLoader> _logger;
-    private const string FilePath = "C:\\Users\\Khan_San\\source\\repos\\MachineAssetTracker\\MachineAssetTracker\\Data\\matrix.txt";  // File location
+    private readonly MongoDBContext _machineAssests = new MongoDBContext();
+    private readonly MongoDBContext _machines = new MongoDBContext();
+    private readonly MongoDBContext _assets = new MongoDBContext();
 
-    public DataLoader(MongoDBContext mongoDbContext, ILogger<DataLoader> logger)  // Inject MongoDBContext
+    private readonly ILogger<DataLoader> _logger;
+    private const string FilePath = "C:\\Users\\Khan_San\\source\\repos\\MachineAssetTracker\\MachineAssetTracker\\Data\\matrix.txt";  
+
+    public DataLoader(MongoDBContext mongoDbContext, ILogger<DataLoader> logger) 
     {
-        _mongoDbContext = mongoDbContext;
+        _machineAssests = mongoDbContext;
         _logger = logger;
     }
 
@@ -19,6 +23,7 @@ public class DataLoader : IHostedService
 
         if (File.Exists(FilePath))
         {
+            //Adding the data to in MachineAsset collection
             var machineAssets = File.ReadAllLines(FilePath)
                 .Select(line => line.Split(','))
                 .Where(parts => parts.Length == 3)
@@ -33,12 +38,34 @@ public class DataLoader : IHostedService
             {
                 throw new ArgumentException($"No data found in file {FilePath}!");
             }
-            foreach (var machineAsset in machineAssets)
-            {
-                Console.WriteLine($"MachineType: {machineAsset.MachineType}, Asset: {machineAsset.Asset}, Series: {machineAsset.Series}");
-            }
-             _mongoDbContext.InsertMany(machineAssets);  // Using the injected MongoDBContext
+             _machineAssests.InsertMachineAssets(machineAssets);  // Using the injected MongoDBContext
             _logger.LogInformation("Machine asset data successfully loaded into MongoDB.");
+
+            //Adding the data to in Machine collection
+            var machines = machineAssets
+                        .GroupBy(ma => ma.MachineType)
+                        .Select(g => new Machine
+                        {
+                            MachineType = g.Key,
+                            Assets = g.Select(ma => new Asset
+                            {
+                                AssetName = ma.Asset,
+                                Series = new List<string> { ma.Series }  
+                            }).ToList()
+                        }).ToList();
+            _machines.InsertMachines(machines);
+
+            //Adding the data to asset collection
+            var assets = machineAssets
+                .GroupBy(ma => ma.Asset)
+                .Select(g => new Asset
+                {
+                    AssetName = g.Key,
+                    Series = g.Select(ma => ma.Series).ToList()
+                }).ToList();
+            _assets.InsertAssets(assets);
+
+
         }
         else
         {
