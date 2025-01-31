@@ -24,6 +24,7 @@ builder.Services.AddSingleton<MachineAssetData>();
 builder.Services.AddHostedService<DataLoader>();
 builder.Services.AddScoped<IMachineAssetsService, MachineAssetsService>();
 builder.Services.AddScoped<IMachineService, MachineService>();
+builder.Services.AddScoped<IAssetService, AssetService>();
 
 // Add Swagger services
 builder.Services.AddEndpointsApiExplorer();

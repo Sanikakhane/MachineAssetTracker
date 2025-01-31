@@ -26,10 +26,10 @@ namespace MachineAssetTracker.Controllers
             _machineService.InsertMachine(machineAsset);
             return Ok();
         }
-        [HttpPatch]
-        public IActionResult UpdateMachineDetails(string Id,[FromBody] Machine machineAsset)
+        [HttpPatch ("{id}")]
+        public IActionResult UpdateMachineDetails(string id,[FromBody] Machine machineAsset)
         {
-            _machineService.UpdateMachineDetails(Id,machineAsset);
+            _machineService.UpdateMachineDetails(id,machineAsset);
             return Ok();
         }
         [HttpDelete("{id}")]

@@ -1,4 +1,5 @@
 ﻿using MachineAssetTracker.Models;
+using MongoDB.Bson;
 using MongoDB.Driver;
 
 namespace MachineAssetTracker.Data
@@ -28,15 +29,18 @@ namespace MachineAssetTracker.Data
                 _collection.InsertOne(asset);
             }
         }
-        public void UpdateAsset( Asset asset)
+        public void UpdateAsset( string Id,Asset asset)
         {
-            var existingAsset = _collection.Find(a => a.AssetName == asset.AssetName).FirstOrDefault();
-            if (existingAsset == null)
+            Console.WriteLine("Asset Id: " + Id);
+            var existingAsset = _collection.Find(a => a.Id == Id).FirstOrDefault();
+            if (existingAsset != null)
             {
-                _collection.InsertOne(asset);
+                asset.Id = Id;
+                _collection.ReplaceOne(a=> a.Id== Id,asset);
             }
             else
             {
+                existingAsset = _collection.Find(a => a.AssetName == asset.AssetName).FirstOrDefault();
                 foreach (var series in asset.Series)
                 {
                     if (!existingAsset.Series.Contains(series))
