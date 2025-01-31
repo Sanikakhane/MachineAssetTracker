@@ -20,9 +20,10 @@ Log.Logger = new LoggerConfiguration()
 // Add Serilog to the logging pipeline
 builder.Logging.ClearProviders();  // Clear other providers (if any)
 builder.Logging.AddSerilog();  // Add Serilog for logging
-builder.Services.AddSingleton<MongoDBContext>();
+builder.Services.AddSingleton<MachineAssetData>();
 builder.Services.AddHostedService<DataLoader>();
 builder.Services.AddScoped<IMachineAssetsService, MachineAssetsService>();
+builder.Services.AddScoped<IMachineService, MachineService>();
 
 // Add Swagger services
 builder.Services.AddEndpointsApiExplorer();
@@ -50,6 +51,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI(c =>
     {
         c.SwaggerEndpoint("/swagger/v1/swagger.json", "My API V1");
+        c.RoutePrefix = string.Empty;
     });
 }
 app.MapControllers();

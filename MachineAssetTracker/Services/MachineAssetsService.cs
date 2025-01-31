@@ -9,10 +9,12 @@ namespace MachineAssetTracker.Services
 {
     public class MachineAssetsService : IMachineAssetsService
     {
-        private static MongoDBContext _mongoDbContext = new MongoDBContext();
-        List<MachineAsset> machineAssets= _mongoDbContext.GetAllMachineAssets();
-        List<Machine> machines = _mongoDbContext.GetAllMachines();
-        List<Asset> assets = _mongoDbContext.GetAllAssets();
+        private static MachineAssetData _machineAssets = new MachineAssetData();
+        private static MachineData _machines = new MachineData();
+        private static AssetData _assets = new AssetData();
+        List<MachineAsset> machineAssets= _machineAssets.GetAll();
+        List<Machine> machines = _machines.GetAll();
+        List<Asset> assets = _assets.GetAll();
         public List<string> GetAssetsByMachineType(string machineType)
         {
             return machineAssets.Where(a => a.MachineType == machineType).Select(a => a.Asset).Distinct().ToList();

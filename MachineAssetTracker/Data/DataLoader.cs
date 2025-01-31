@@ -4,14 +4,14 @@ using MachineAssetTracker.Models;
 
 public class DataLoader : IHostedService
 {
-    private readonly MongoDBContext _machineAssests = new MongoDBContext();
-    private readonly MongoDBContext _machines = new MongoDBContext();
-    private readonly MongoDBContext _assets = new MongoDBContext();
+    private readonly MachineAssetData _machineAssests = new MachineAssetData();
+    private readonly MachineData _machines = new MachineData();
+    private readonly AssetData _assets = new AssetData();
 
     private readonly ILogger<DataLoader> _logger;
     private const string FilePath = "C:\\Users\\Khan_San\\source\\repos\\MachineAssetTracker\\MachineAssetTracker\\Data\\matrix.txt";  
 
-    public DataLoader(MongoDBContext mongoDbContext, ILogger<DataLoader> logger) 
+    public DataLoader(MachineAssetData mongoDbContext, ILogger<DataLoader> logger) 
     {
         _machineAssests = mongoDbContext;
         _logger = logger;
@@ -38,7 +38,7 @@ public class DataLoader : IHostedService
             {
                 throw new ArgumentException($"No data found in file {FilePath}!");
             }
-             _machineAssests.InsertMachineAssets(machineAssets);  // Using the injected MongoDBContext
+             _machineAssests.InsertMany(machineAssets);  // Using the injected MongoDBContext
             _logger.LogInformation("Machine asset data successfully loaded into MongoDB.");
 
             //Adding the data to in Machine collection
@@ -53,7 +53,7 @@ public class DataLoader : IHostedService
                                 Series = new List<string> { ma.Series }  
                             }).ToList()
                         }).ToList();
-            _machines.InsertMachines(machines);
+            _machines.InsertMany(machines);
 
             //Adding the data to asset collection
             var assets = machineAssets
@@ -63,7 +63,7 @@ public class DataLoader : IHostedService
                     AssetName = g.Key,
                     Series = g.Select(ma => ma.Series).ToList()
                 }).ToList();
-            _assets.InsertAssets(assets);
+            _assets.InsertMany(assets);
 
 
         }
