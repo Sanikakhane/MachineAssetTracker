@@ -15,8 +15,15 @@ namespace MachineAssetTracker.Services
         List<MachineAsset> machineAssets= _machineAssets.GetAll();
         List<Machine> machines = _machines.GetAll();
         List<Asset> assets = _assets.GetAll();
+
+        public List<MachineAsset> GetAll()
+        {
+            return machineAssets;
+        }
+
         public List<string> GetAssetsByMachineType(string machineType)
         {
+
             return machineAssets.Where(a => a.MachineType == machineType).Select(a => a.Asset).Distinct().ToList();
         }
 

@@ -5,6 +5,7 @@ using MongoDB.Driver;
 using MachineAssetTracker.Services;
 using Serilog;
 using MachineAssetTracker.Data;
+using System.Reflection;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -31,9 +32,18 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
 {
     options.SwaggerDoc("v1", new OpenApiInfo { Title = "Machine Asset Tracker API", Version = "v1" });
+    var xmlFilename = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+    options.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, xmlFilename));
+    
 });
 
-
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowSpecificOrigin",
+        builder => builder.WithOrigins("https://localhost:7053") // URL of your Blazor WASM app
+                            .AllowAnyHeader()
+                            .AllowAnyMethod());
+});
 
 
 var app = builder.Build();
@@ -60,6 +70,8 @@ app.UseHttpsRedirection();
 
 app.UseStaticFiles();
 app.UseAntiforgery();
+app.UseCors("AllowSpecificOrigin");
+
 
 app.MapRazorComponents<App>();
 
