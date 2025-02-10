@@ -12,7 +12,7 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddRazorComponents();
 builder.Services.AddControllers();
-/// Set up Serilog
+// Set up Serilog
 Log.Logger = new LoggerConfiguration()
     .WriteTo.Console()  // Log to console (optional)
     .WriteTo.File("logs/log-.txt", rollingInterval: RollingInterval.Day)  // Log files that roll daily

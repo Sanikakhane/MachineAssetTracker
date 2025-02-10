@@ -3,6 +3,7 @@ using MachineAssetTracker.Models;
 using MachineAssetTracker.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using MongoDB.Bson;
 
 namespace MachineAssetTracker.Controllers
 {
@@ -25,6 +26,11 @@ namespace MachineAssetTracker.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public IActionResult GetAll()
         {
+            var assets = _assetService.GetAll();
+            if(assets.Count == 0 || assets == null)
+            {
+                return NotFound();
+            }
             return Ok(_assetService.GetAll());
         }
 
@@ -38,8 +44,14 @@ namespace MachineAssetTracker.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public IActionResult InsertAsset([FromBody] Asset asset)
         {
+            if (asset == null)
+            {
+                return BadRequest("Request body cannot be empty");
+            }
+
+
             _assetService.InsertAsset(asset);
-            return Ok();
+            return Ok("Succesfully added");
         }
 
         /// <summary>
@@ -54,8 +66,17 @@ namespace MachineAssetTracker.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public IActionResult UpdateAssetDetails(string id, [FromBody] Asset asset)
         {
+            if (!ObjectId.TryParse(id, out ObjectId objectId))
+            {
+                return BadRequest("Invalid Id format. Id must be a 24-character hex string.");
+            }
+            var assetData = _assetService.GetAssetById(id);
+            if (assetData == null)
+            {
+                return NotFound("Invalid Id");
+            }
             _assetService.UpdateAssetDetails(id, asset);
-            return Ok();
+            return Ok("Object updated succesfully");
         }
 
         /// <summary>
@@ -66,10 +87,20 @@ namespace MachineAssetTracker.Controllers
         [HttpDelete("{id}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public IActionResult DeleteAsset(string id)
         {
+            if (!ObjectId.TryParse(id, out ObjectId objectId))
+            {
+                return BadRequest("Invalid Id format. Id must be a 24-character hex string.");
+            }
+            var assetData = _assetService.GetAssetById(id);
+            if (assetData == null)
+            {
+                return NotFound("Id not found");
+            }
             _assetService.DeleteAsset(id);
-            return Ok();
+            return Ok("Object deleted succesfully");
         }
 
         /// <summary>
@@ -80,8 +111,18 @@ namespace MachineAssetTracker.Controllers
         [HttpGet("{id}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
+
         public IActionResult GetAssetById(string id)
         {
+            if (!ObjectId.TryParse(id, out ObjectId objectId))
+            {
+                return BadRequest("Invalid Id format. Id must be a 24-character hex string.");
+            }
+            var assetData = _assetService.GetAssetById(id);
+            if (assetData == null)
+            {
+                return NotFound();
+            }
             return Ok(_assetService.GetAssetById(id));
         }
     }

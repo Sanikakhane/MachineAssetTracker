@@ -53,7 +53,7 @@ namespace MachineAssetTracker.Data
         }
         public Asset GetAssetById(string id)
         {
-            return _collection.Find(a => a.Id == id).FirstOrDefault();
+            return _collection.Find(a => a.Id == id).First();
         }
         public void DeleteAsset(string id)
         {

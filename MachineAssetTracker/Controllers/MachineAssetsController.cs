@@ -23,6 +23,11 @@ namespace MachineAssetTracker.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public IActionResult GetAll()
         {
+            var machineAssets = _machineAssetsService.GetAll();
+            if (machineAssets == null||machineAssets.Count == 0)
+            {
+                return NotFound();
+            }
             return Ok(_machineAssetsService.GetAll());
         }
 
@@ -36,6 +41,11 @@ namespace MachineAssetTracker.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public IActionResult GetAssetsByMachineType(string machineType)
         {
+            var machineAssets = _machineAssetsService.GetAssetsByMachineType(machineType);
+            if(machineAssets == null||machineAssets.Count == 0)
+            {
+                return NotFound();
+            }
             return Ok(_machineAssetsService.GetAssetsByMachineType(machineType));
         }
 
@@ -49,7 +59,12 @@ namespace MachineAssetTracker.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public IActionResult GetMachinesByAsset(string assetName)
         {
-            return Ok(_machineAssetsService.GetMachinesByAsset(assetName));
+            var machineAssets = _machineAssetsService.GetMachinesByAsset(assetName);
+            if (machineAssets == null||machineAssets.Count == 0 )
+            {
+                return NotFound();
+            }
+            return Ok(machineAssets);
         }
 
         /// <summary>
@@ -61,6 +76,11 @@ namespace MachineAssetTracker.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public IActionResult GetMachinesUsingLatestSeries()
         {
+            var machineAssets = _machineAssetsService.GetMachinesUsingLatestSeries();
+            if ( machineAssets == null||machineAssets.Count == 0 )
+            {
+                return NotFound();
+            }
             return Ok(_machineAssetsService.GetMachinesUsingLatestSeries());
         }
     }

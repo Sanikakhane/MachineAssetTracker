@@ -24,6 +24,11 @@ namespace MachineAssetTracker.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public IActionResult GetAll()
         {
+            var machines = _machineService.GetAll();
+            if (machines.Count == 0 || machines == null)
+            {
+                return NotFound();
+            }
             return Ok(_machineService.GetAll());
         }
 
@@ -53,6 +58,11 @@ namespace MachineAssetTracker.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public IActionResult UpdateMachineDetails(string id,[FromBody] Machine machineAsset)
         {
+            var machine = _machineService.GetMachineById(id);
+            if (machine == null)
+            {
+                return NotFound();
+            }
             _machineService.UpdateMachineDetails(id,machineAsset);
             return Ok();
         }
@@ -67,6 +77,11 @@ namespace MachineAssetTracker.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public IActionResult DeleteMachine(string id)
         {
+            var machine = _machineService.GetMachineById(id);
+            if (machine == null)
+            {
+                return NotFound();
+            }
             _machineService.DeleteMachine(id);
             return Ok();
         }
