@@ -6,6 +6,7 @@ using MachineAssetTracker.Services;
 using Serilog;
 using MachineAssetTracker.Data;
 using System.Reflection;
+using Microsoft.AspNetCore.Mvc;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -26,6 +27,15 @@ builder.Services.AddHostedService<DataLoader>();
 builder.Services.AddScoped<IMachineAssetsService, MachineAssetsService>();
 builder.Services.AddScoped<IMachineService, MachineService>();
 builder.Services.AddScoped<IAssetService, AssetService>();
+
+builder.Services.Configure<ApiBehaviorOptions>(options =>
+{
+    options.InvalidModelStateResponseFactory = context =>
+    {
+        return new BadRequestObjectResult("Invalid Format");
+    };
+});
+
 
 // Add Swagger services
 builder.Services.AddEndpointsApiExplorer();

@@ -21,12 +21,18 @@ namespace MachineAssetTracker.Data
                 _collection.InsertMany(data);
             }
         }
-        public void InsertAsset(Asset asset)
+        public string InsertAsset(Asset asset)
         {
             var existingAsset = _collection.Find(a => a.AssetName == asset.AssetName).FirstOrDefault();
             if (existingAsset == null)
             {
+                asset.AssetName.ToLower();
                 _collection.InsertOne(asset);
+                return "Data inserted Succesfully";
+            }
+            else
+            {
+                return "Already Present object";
             }
         }
         public void UpdateAsset( string Id,Asset asset)
@@ -53,7 +59,7 @@ namespace MachineAssetTracker.Data
         }
         public Asset GetAssetById(string id)
         {
-            return _collection.Find(a => a.Id == id).First();
+            return _collection.Find(a => a.Id == id).FirstOrDefault();
         }
         public void DeleteAsset(string id)
         {

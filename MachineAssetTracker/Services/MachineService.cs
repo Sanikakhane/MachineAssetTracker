@@ -23,9 +23,9 @@ namespace MachineAssetTracker.Services
             return _machineData.GetMachineById(id);
         }
 
-        public void InsertMachine(Machine machineAsset)
+        public string InsertMachine(Machine machineAsset)
         {
-            _machineData.InsertMachineWithAssets(machineAsset, machineAsset.Assets);
+            return _machineData.InsertMachineWithAssets(machineAsset, machineAsset.Assets);
         }
 
         public void UpdateMachineDetails(string Id,Machine machineAsset)

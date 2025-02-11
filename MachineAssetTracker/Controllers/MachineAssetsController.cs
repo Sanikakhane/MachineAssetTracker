@@ -26,7 +26,7 @@ namespace MachineAssetTracker.Controllers
             var machineAssets = _machineAssetsService.GetAll();
             if (machineAssets == null||machineAssets.Count == 0)
             {
-                return NotFound();
+                return NotFound("No data found");
             }
             return Ok(_machineAssetsService.GetAll());
         }
@@ -41,10 +41,11 @@ namespace MachineAssetTracker.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public IActionResult GetAssetsByMachineType(string machineType)
         {
+            machineType = machineType.ToLower();
             var machineAssets = _machineAssetsService.GetAssetsByMachineType(machineType);
             if(machineAssets == null||machineAssets.Count == 0)
             {
-                return NotFound();
+                return NotFound("Enter valid machine type");
             }
             return Ok(_machineAssetsService.GetAssetsByMachineType(machineType));
         }
@@ -59,10 +60,11 @@ namespace MachineAssetTracker.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public IActionResult GetMachinesByAsset(string assetName)
         {
+            assetName = assetName.ToLower();
             var machineAssets = _machineAssetsService.GetMachinesByAsset(assetName);
             if (machineAssets == null||machineAssets.Count == 0 )
             {
-                return NotFound();
+                return NotFound("Enter valid Asset name");
             }
             return Ok(machineAssets);
         }

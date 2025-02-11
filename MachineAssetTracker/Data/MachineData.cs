@@ -23,56 +23,63 @@ namespace MachineAssetTracker.Data
         }
 
     
-        public void InsertMachineWithAssets(Machine machine, List<Asset> assets)
+        public string InsertMachineWithAssets(Machine machine, List<Asset> assets)
         {
-            var existingMachine = _collection.Find(a => a.Id == machine.Id).FirstOrDefault();
+            var existingMachine = _collection.Find(a => a.MachineType == machine.MachineType).FirstOrDefault();
             if (existingMachine == null)
             {
+                machine.MachineType = machine.MachineType.ToLower();
                 _collection.InsertOne(machine);
-            }
-            
-
-            foreach (var asset in assets)
-            {
-                var existingAsset = _assetCollection.Find(a => a.AssetName == asset.AssetName).FirstOrDefault();
-                if (existingAsset == null)
+                foreach (var asset in assets)
                 {
-                    _assetCollection.InsertOne(asset);
+                    var existingAsset = _assetCollection.Find(a => a.AssetName == asset.AssetName).FirstOrDefault();
+                    if (existingAsset == null)
+                    {
+                        asset.AssetName = asset.AssetName.ToLower();
+                        _assetCollection.InsertOne(asset);
+                    }
+                    else
+                    {
+                        foreach (var series in asset.Series)
+                        {
+                            if (!existingAsset.Series.Contains(series))
+                            {
+                                existingAsset.Series.Add(series);
+                            }
+                            asset.AssetName = asset.AssetName.ToLower();
+                            _assetCollection.ReplaceOne(a => a.AssetName == asset.AssetName, existingAsset);
+                        }
+                    }
+
                 }
-                else
+
+                foreach (var asset in machine.Assets)
                 {
                     foreach (var series in asset.Series)
                     {
-                        if (!existingAsset.Series.Contains(series))
+                        var existingMachineAsset = _machineAssetCollection.Find(ma => ma.Id == machine.Id && ma.Asset == asset.AssetName && ma.Series == series).FirstOrDefault();
+                        if (existingMachineAsset == null)
                         {
-                            existingAsset.Series.Add(series);
+                            var machineAsset = new MachineAsset
+                            {
+                                Id = machine.Id,
+                                MachineType = machine.MachineType.ToLower(),
+                                Asset = asset.AssetName.ToLower(),
+                                Series = series
+                            };
+                            _machineAssetCollection.InsertOne(machineAsset);
                         }
-                        _assetCollection.ReplaceOne(a => a.AssetName == asset.AssetName, existingAsset);
+
+
                     }
                 }
-
+                return "Succesfully added";
             }
-
-            foreach (var asset in machine.Assets)
+            else 
             {
-                foreach(var series in asset.Series)
-                {
-                    var existingMachineAsset = _machineAssetCollection.Find(ma => ma.Id == machine.Id && ma.Asset == asset.AssetName && ma.Series == series).FirstOrDefault();
-                    if(existingMachineAsset == null)
-                    {
-                        var machineAsset = new MachineAsset
-                        {
-                            Id = machine.Id,
-                            MachineType = machine.MachineType,
-                            Asset = asset.AssetName,
-                            Series = series
-                        };
-                        _machineAssetCollection.InsertOne(machineAsset);
-                    }
-
-                    
-                }
+                return "Object already present";
             }
+            
         }
 
   
@@ -82,6 +89,7 @@ namespace MachineAssetTracker.Data
             if (existingMachine != null)
             {
                 machine.Id = Id;
+                machine.MachineType = machine.MachineType.ToLower();
                 _collection.ReplaceOne(m => m.Id == Id, machine);
             }
         }

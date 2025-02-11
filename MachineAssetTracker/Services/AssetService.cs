@@ -22,9 +22,9 @@ namespace MachineAssetTracker.Services
             return _assetData.GetAssetById(id);
         }
 
-        public void InsertAsset(Asset asset)
+        public string InsertAsset(Asset asset)
         {
-            _assetData.InsertAsset(asset);
+            return _assetData.InsertAsset(asset);
         }
 
         public void UpdateAssetDetails(string Id, Asset asset)

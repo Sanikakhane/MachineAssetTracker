@@ -29,16 +29,16 @@ public class DataLoader : IHostedService
                 .Where(parts => parts.Length == 3)
                 .Select(parts => new MachineAsset
                 {
-                    MachineType = parts[0].Trim(),
+                    MachineType = parts[0].Trim().ToLower(),
                     
-                    Asset = parts[1].Trim(),
+                    Asset = parts[1].Trim().ToLower(),
                     Series = parts[2].Trim()
                 }).ToList();
             if(machineAssets.Count == 0)
             {
                 throw new ArgumentException($"No data found in file {FilePath}!");
             }
-             _machineAssests.InsertMany(machineAssets);  // Using the injected MongoDBContext
+             _machineAssests.InsertMany(machineAssets); 
             _logger.LogInformation("Machine asset data successfully loaded into MongoDB.");
 
             //Adding the data to in Machine collection
@@ -46,10 +46,10 @@ public class DataLoader : IHostedService
                         .GroupBy(ma => ma.MachineType)
                         .Select(g => new Machine
                         {
-                            MachineType = g.Key,
+                            MachineType = g.Key.ToLower(),
                             Assets = g.Select(ma => new Asset
                             {
-                                AssetName = ma.Asset,
+                                AssetName = ma.Asset.ToLower(),
                                 Series = new List<string> { ma.Series }  
                             }).ToList()
                         }).ToList();
@@ -60,9 +60,10 @@ public class DataLoader : IHostedService
                 .GroupBy(ma => ma.Asset)
                 .Select(g => new Asset
                 {
-                    AssetName = g.Key,
+                    AssetName = g.Key.ToLower(),
                     Series = g.Select(ma => ma.Series).ToList()
                 }).ToList();
+
             _assets.InsertMany(assets);
 
 

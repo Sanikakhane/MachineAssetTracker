@@ -27,9 +27,9 @@ namespace MachineAssetTracker.Controllers
         public IActionResult GetAll()
         {
             var assets = _assetService.GetAll();
-            if(assets.Count == 0 || assets == null)
+            if( assets == null || assets.Count == 0 )
             {
-                return NotFound();
+                return NotFound("No data found");
             }
             return Ok(_assetService.GetAll());
         }
@@ -48,10 +48,16 @@ namespace MachineAssetTracker.Controllers
             {
                 return BadRequest("Request body cannot be empty");
             }
-
-
-            _assetService.InsertAsset(asset);
-            return Ok("Succesfully added");
+            else if (asset.Series == null || !asset.Series.Any()) 
+            {
+                return BadRequest("At least one series must be provided." );
+            }
+            else if (!ModelState.IsValid) // Check if model validation fails
+            {
+                return BadRequest("Invalid format");
+            }
+            asset.AssetName = asset.AssetName.ToLower();
+            return Ok(_assetService.InsertAsset(asset));
         }
 
         /// <summary>
@@ -59,7 +65,7 @@ namespace MachineAssetTracker.Controllers
         /// </summary>
         /// <param name="id"></param>
         /// <param name="asset"></param>
-        /// <returns>Updated asset object</returns>
+        /// <returns>Updated status</returns>
         [HttpPatch ("{id}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -75,6 +81,7 @@ namespace MachineAssetTracker.Controllers
             {
                 return NotFound("Invalid Id");
             }
+            asset.AssetName = asset.AssetName.ToLower();
             _assetService.UpdateAssetDetails(id, asset);
             return Ok("Object updated succesfully");
         }
@@ -100,7 +107,7 @@ namespace MachineAssetTracker.Controllers
                 return NotFound("Id not found");
             }
             _assetService.DeleteAsset(id);
-            return Ok("Object deleted succesfully");
+            return Ok($"Object deleted succesfully  {id}");
         }
 
         /// <summary>
@@ -118,10 +125,10 @@ namespace MachineAssetTracker.Controllers
             {
                 return BadRequest("Invalid Id format. Id must be a 24-character hex string.");
             }
-            var assetData = _assetService.GetAssetById(id);
-            if (assetData == null)
+            var exisingAsset = _assetService.GetAssetById(id);
+            if (exisingAsset == null)
             {
-                return NotFound();
+                return NotFound("Id not found");
             }
             return Ok(_assetService.GetAssetById(id));
         }

@@ -2,6 +2,7 @@
 using MachineAssetTracker.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using MongoDB.Bson;
 
 namespace MachineAssetTracker.Controllers
 {
@@ -25,9 +26,9 @@ namespace MachineAssetTracker.Controllers
         public IActionResult GetAll()
         {
             var machines = _machineService.GetAll();
-            if (machines.Count == 0 || machines == null)
+            if ( machines == null || machines.Count == 0 )
             {
-                return NotFound();
+                return NotFound("No data found");
             }
             return Ok(_machineService.GetAll());
         }
@@ -42,8 +43,17 @@ namespace MachineAssetTracker.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public IActionResult InsertMachine([FromBody] Machine machineAsset)
         {
-            _machineService.InsertMachine(machineAsset);
-            return Ok();
+            if(machineAsset == null) 
+            {
+                return BadRequest("Request body cannot be empty");
+            }
+            else if (!ModelState.IsValid) // Check if model validation fails
+            {
+                return BadRequest("Invalid format");
+            }
+            machineAsset.MachineType = machineAsset.MachineType.ToLower();
+            
+            return Ok(_machineService.InsertMachine(machineAsset));
         }
 
         /// <summary>
@@ -51,20 +61,25 @@ namespace MachineAssetTracker.Controllers
         /// </summary>
         /// <param name="id"></param>
         /// <param name="machineAsset"></param>
-        /// <returns>Updated Machine object</returns>
+        /// <returns>Updated status</returns>
         [HttpPatch ("{id}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public IActionResult UpdateMachineDetails(string id,[FromBody] Machine machineAsset)
         {
+            if (!ObjectId.TryParse(id, out ObjectId objectId))
+            {
+                return BadRequest("Invalid Id format. Id must be a 24-character hex string.");
+            }
             var machine = _machineService.GetMachineById(id);
             if (machine == null)
             {
-                return NotFound();
+                return NotFound("Invalid Id");
             }
+            machineAsset.MachineType = machineAsset.MachineType.ToLower();
             _machineService.UpdateMachineDetails(id,machineAsset);
-            return Ok();
+            return Ok("Object updated succesfully");
         }
 
         /// <summary>
@@ -77,13 +92,17 @@ namespace MachineAssetTracker.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public IActionResult DeleteMachine(string id)
         {
+            if (!ObjectId.TryParse(id, out ObjectId objectId))
+            {
+                return BadRequest("Invalid Id format. Id must be a 24-character hex string.");
+            }
             var machine = _machineService.GetMachineById(id);
             if (machine == null)
             {
-                return NotFound();
+                return NotFound("Id not found");
             }
             _machineService.DeleteMachine(id);
-            return Ok();
+            return Ok($"Object Deleted Succesfully {id}");
         }
 
         /// <summary>
@@ -96,6 +115,15 @@ namespace MachineAssetTracker.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public IActionResult GetMachineById(string id)
         {
+            if (!ObjectId.TryParse(id, out ObjectId objectId))
+            {
+                return BadRequest("Invalid Id format. Id must be a 24-character hex string.");
+            }
+            var existingMachine = _machineService.GetMachineById(id);
+            if (existingMachine == null) 
+            {
+                return NotFound("Id not found");
+            }
             return Ok(_machineService.GetMachineById(id));
         }
     }
