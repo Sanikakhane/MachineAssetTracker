@@ -7,6 +7,8 @@ using Serilog;
 using MachineAssetTracker.Data;
 using System.Reflection;
 using Microsoft.AspNetCore.Mvc;
+using MachineAssetTracker;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -27,14 +29,8 @@ builder.Services.AddHostedService<DataLoader>();
 builder.Services.AddScoped<IMachineAssetsService, MachineAssetsService>();
 builder.Services.AddScoped<IMachineService, MachineService>();
 builder.Services.AddScoped<IAssetService, AssetService>();
+builder.Services.AddExceptionHandler<AppExceptionHandler>();
 
-builder.Services.Configure<ApiBehaviorOptions>(options =>
-{
-    options.InvalidModelStateResponseFactory = context =>
-    {
-        return new BadRequestObjectResult("Invalid Format");
-    };
-});
 
 
 // Add Swagger services
@@ -57,7 +53,7 @@ builder.Services.AddCors(options =>
 
 
 var app = builder.Build();
-
+app.UseExceptionHandler(_ => { });
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {
@@ -71,6 +67,9 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI(c =>
     {
+        c.DocumentTitle = string.IsNullOrEmpty(DataLoader.DataLoadError)
+        ? "Machine Asset Tracker API"
+        : " WARNING: Data Load Error - Check /api/employees/dataloader-error";
         c.SwaggerEndpoint("/swagger/v1/swagger.json", "My API V1");
         c.RoutePrefix = string.Empty;
     });

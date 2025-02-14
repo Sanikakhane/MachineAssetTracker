@@ -42,6 +42,7 @@ namespace MachineAssetTracker.Controllers
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
+ 
         public IActionResult InsertAsset([FromBody] Asset asset)
         {
             if (asset == null)
